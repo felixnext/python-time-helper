@@ -24,3 +24,5 @@ from .ops import (
 from .range import (
     time_to_interval
 )
+
+from .wrapper import DateTimeWrapper

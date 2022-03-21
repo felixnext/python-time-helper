@@ -24,6 +24,7 @@ setup(
     long_description_content_type="text/markdown",
     keywords='time handling',
     url='https://github.com/felixnext/python-time-helper',
+    download_url='https://github.com/felixnext/python-time-helper/releases/tag/v0.1.0-alpha',
     author='Felix Geilert',
     license='MIT License',
     packages=find_packages(include=['time_helper', 'time_helper.*']),
