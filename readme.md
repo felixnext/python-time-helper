@@ -7,7 +7,7 @@ The general idea is to have a bunch of one-stop functions that allow you to easi
 ## Getting Started
 
 ```bash
-$ pip install time-helper
+pip install time-helper
 ```
 
 Then in python code:
@@ -47,22 +47,59 @@ dt = th.any_to_datetime(date(2022, 3, 10))
 It also allows to easily switch between aware and unaware datetime:
 
 ```python
-
+dt = th.any_to_datetime("2022-03-10")
+aware_dt = th.make_aware(dt)
+aware_dt = th.make_aware(dt, "UTC")
+unaware_dt = th.make_unaware(dt)
+unaware_dt = th.make_unaware(dt, "UTC")
 ```
+
+Note that for `make_unaware` you can still provide a datetime. In that case the datetime is first converted into the regarding timezone before the
+timezone information is removed from the object. You can also explicitly convert the timezone with `localize_datetime`.
 
 ### Operations & Ranges
 
-pass
+The library also defines a range of operations to make working with timezones easier.
+These include handling modifications of a single datetime:
 
-### Timezone
+```python
+day = th.round_time(dt, "D")
+# results in: datetime.datetime(2022, 3, 10, 0, 0)
+day = th.round_time(dt, "D", max_out=True)
+# results in: datetime.datetime(2022, 3, 10, 23, 59, 59, 999999)
+has_tz = th.has_timezone(aware_dt)
+has_tz = th.has_timezone(unaware_dt)
 
-Helps to handle timezone awareness
+# compute a diff (between aware and unaware datetimes)
+diff = th.time_diff(
+    th.round_time(aware_dt, "M", max_out=True),
+    unaware_dt
+)
+# results in: datetime.timedelta(seconds=3659, microseconds=999999)
+```
+
+It also supports a bunch of range operations:
+
+```python
+# converts the time into a interval (float) value for the defined range
+# default i
+dt = datetime(2022, 3, 12, 12, 0)
+pos = th.time_to_interval(dt, offset=0)
+# results in: 0.0 (as it is noon)
+pos = th.time_to_interval(dt, offset=0, zero_center=False)
+# results in: 0.5 (as half day is gone and center is no longer zeroed)
+
+# create interval tuples
+ivs = th.create_intervals(dt, dt + timedelta(days=2), interval=1)
+ivs = th.create_intervals(dt, dt + timedelta(days=2), interval=timedelta(minutes=30))
+```
 
 ### Wrapper
 
-This library also provides a wrapper class to make all functions more accessible and first class citizens of the system
+This library also provides a wrapper class to make all functions more accessible and first class citizens of the system.
 
+> **Note:** This part of the library is still under construction.
 
-## Examples
+## Notes
 
-Here are a few examples on how this library can be used in praxis:
+There is still a lot to improve on this library, please feel free to create PRs or contact me if you wish to contribute!
