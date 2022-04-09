@@ -7,8 +7,6 @@ This makes many of the functions first class citizens and can easily expose the 
 from datetime import datetime
 from typing import Any
 
-from numpy import isin
-
 from time_helper.convert import any_to_datetime
 from time_helper.ops import time_diff
 

@@ -26,3 +26,7 @@ from .range import (
 )
 
 from .wrapper import DateTimeWrapper
+
+
+# define the version
+__version__ = "0.1.1"

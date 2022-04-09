@@ -13,19 +13,23 @@ try:
 except ImportError:
     from backports.zoneinfo import ZoneInfo as timezone
 try:
+    import pandas as pd
     from pandas import Series, DataFrame
     from pandas.api.types import (
         is_datetime64_any_dtype as is_datetime
     )
     from pandas import to_datetime
 except Exception:
+    pd = None
     Series = None
     DataFrame = None
     is_datetime = lambda x: False
     to_datetime = lambda x: None
 try:
+    import numpy as np
     from numpy import array as nparray
 except Exception:
+    np = None
     nparray = None
 from pytz import AmbiguousTimeError
 
@@ -104,11 +108,16 @@ def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, 
     if ts is None or isinstance(ts, datetime):
         return ts
 
+    # check if only date
+    if isinstance(ts, date):
+        dt = datetime.combine(ts, datetime.min.time())
+
     # convert from int or string
-    try:
-        dt = unix_to_datetime(ts)
-    except Exception:
-        pass
+    if dt is None:
+        try:
+            dt = unix_to_datetime(ts)
+        except Exception:
+            pass
 
     # try relevant string formats
     if dt is None and isinstance(ts, str):
@@ -133,6 +142,18 @@ def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, 
     # check if only date
     if isinstance(dt, date):
         dt = datetime.combine(dt, datetime.min.time())
+
+    # check for additional types
+    if pd:
+        if isinstance(dt, pd.Timestamp):
+            dt = dt.to_pydatetime
+        if dt == pd.NaT:
+            return None
+    if np:
+        if isinstance(dt, np.datetime64):
+            dt = dt.astype(datetime)
+        if dt == np.nan:
+            return None
 
     if dt is None:
         raise ValueError(f"Unable to parse datetime ({ts})")
@@ -226,6 +247,8 @@ def make_aware(dt: Union[datetime, str, Any], tz: Union[str, timezone, Any] = No
 
     # make sure dt is datetime
     dt = any_to_datetime(dt)
+    if dt is None:
+        return None
 
     # check if already aware
     if dt.tzinfo is not None and (tz is None or force_convert is False):
@@ -281,6 +304,7 @@ def make_aware_pandas(df: Union[Series, DataFrame], col: str, format=None, tz=No
             except Exception:
                 pass
 
+    # TODO: update timezone ensurances
     # ensure timezone
     if not hasattr(df[col].iloc[0], 'tzinfo') or not df[col].iloc[0].tzinfo:
         cur_tz = current_timezone().key

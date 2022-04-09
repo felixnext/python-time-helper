@@ -12,7 +12,8 @@ import pytest
 
 from time_helper import localize_datetime, unix_to_datetime, parse_time, make_aware, make_unaware, has_timezone
 
-LOCAL_TZ = "CET"
+LOCAL_TZ = datetime.now().astimezone().tzname()
+LOCAL_TZ = "CET" if LOCAL_TZ == "CEST" else LOCAL_TZ
 
 
 def test_parse():

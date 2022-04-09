@@ -1,5 +1,5 @@
 
-from datetime import tzinfo
+from datetime import tzinfo, datetime
 
 import pytest
 try:
@@ -9,7 +9,8 @@ except ImportError:
 
 from time_helper import find_timezone, current_timezone
 
-LOCAL_TZ = "CET"
+LOCAL_TZ = datetime.now().astimezone().tzname()
+LOCAL_TZ = "CET" if LOCAL_TZ == "CEST" else LOCAL_TZ
 
 
 def test_findtz():
