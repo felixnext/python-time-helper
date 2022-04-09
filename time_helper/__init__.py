@@ -22,7 +22,12 @@ from .ops import (
 )
 
 from .range import (
-    time_to_interval
+    time_to_interval,
+    create_intervals
 )
 
 from .wrapper import DateTimeWrapper
+
+
+# define the version
+__version__ = "0.1.1"

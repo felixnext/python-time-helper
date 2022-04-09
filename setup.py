@@ -1,20 +1,34 @@
 import os
 from setuptools import setup
 from setuptools import find_packages
+from time_helper import __version__
+import pathlib
 
 
 __status__      = "Package"
 __copyright__   = "Copyright 2022"
 __license__     = "MIT License"
-__version__     = "0.1.0"
-
-# 01101100 00110000 00110000 01110000
 __author__      = "Felix Geilert"
 
 
 this_directory = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_directory, 'readme.md'), encoding='utf-8') as f:
     long_description = f.read()
+
+
+def versions_in_requirements(file):
+    lines = file.read().splitlines()
+    versions = [
+        line
+        for line in lines
+        if not line.isspace() and "--" not in line
+    ]
+    return list(versions)
+
+
+HERE = pathlib.Path(__file__).parent
+with open(HERE / "requirements.txt") as f:
+    required_list = versions_in_requirements(f)
 
 setup(
     name='time-helper',
@@ -28,7 +42,7 @@ setup(
     author='Felix Geilert',
     license='MIT License',
     packages=find_packages(include=['time_helper', 'time_helper.*']),
-    install_requires=['numpy', 'pandas', 'pytz'],
+    install_requires=required_list,
     setup_requires=['pytest-runner', 'flake8'],
     tests_require=['pytest'],
     include_package_data=True,
@@ -41,5 +55,6 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
 )

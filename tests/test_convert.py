@@ -12,7 +12,8 @@ import pytest
 
 from time_helper import localize_datetime, unix_to_datetime, parse_time, make_aware, make_unaware, has_timezone
 
-LOCAL_TZ = "CET"
+LOCAL_TZ = datetime.now().astimezone().tzname()
+LOCAL_TZ = "CET" if LOCAL_TZ == "CEST" else LOCAL_TZ
 
 
 def test_parse():
@@ -80,9 +81,9 @@ def test_localize():
     assert date.time() == loc_date.time()
 
     # ensures that the aware date can be converted in timezone
-    loc_date_2 = localize_datetime(loc_date, "UTC")
-    assert loc_date_2.tzinfo.tzname(None) == zoneinfo.ZoneInfo("UTC").tzname(None)
-    assert date.date() == loc_date_2.date()
+    loc_date_2 = localize_datetime(loc_date, "Asia/Kolkata")
+    assert loc_date_2.tzinfo.tzname(None) == zoneinfo.ZoneInfo("Asia/Kolkata").tzname(None)
+    assert abs(date.date() - loc_date_2.date()) <= timedelta(days=1)
     assert date.time() != loc_date_2.time()
 
     # makes sure that conversion back restores original timezone
