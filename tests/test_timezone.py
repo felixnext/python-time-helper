@@ -19,10 +19,10 @@ def test_findtz():
     assert tz is not None
     assert tz == zoneinfo.ZoneInfo("UTC")
 
-    tz = find_timezone("us/Eastern")
+    tz = find_timezone("Asia/Kolkata")
     assert type(tz) in (tzinfo, zoneinfo.ZoneInfo)
     assert tz is not None
-    assert tz == zoneinfo.ZoneInfo("us/Eastern")
+    assert tz == zoneinfo.ZoneInfo("Asia/Kolkata")
 
     tz = find_timezone("foobar")
     assert tz is None

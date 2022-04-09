@@ -81,8 +81,8 @@ def test_localize():
     assert date.time() == loc_date.time()
 
     # ensures that the aware date can be converted in timezone
-    loc_date_2 = localize_datetime(loc_date, "UTC")
-    assert loc_date_2.tzinfo.tzname(None) == zoneinfo.ZoneInfo("UTC").tzname(None)
+    loc_date_2 = localize_datetime(loc_date, "Asia/Kolkata")
+    assert loc_date_2.tzinfo.tzname(None) == zoneinfo.ZoneInfo("Asia/Kolkata").tzname(None)
     assert date.date() == loc_date_2.date()
     assert date.time() != loc_date_2.time()
 
