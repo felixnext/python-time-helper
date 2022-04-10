@@ -176,6 +176,9 @@ def test_aware():
     df_new = make_aware(df, col="date")
     assert has_timezone(df_new, "date") is True
 
+    df_none = make_aware("")
+    assert df_none is None
+
     # TODO: add additional test cases here
 
 
@@ -201,3 +204,6 @@ def test_unaware():
 
     dt = make_unaware("2021-07-12")
     assert dt == datetime(2021, 7, 12)
+
+    dt = make_unaware("")
+    assert dt is None
