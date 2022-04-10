@@ -121,6 +121,10 @@ def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, 
 
     # try relevant string formats
     if dt is None and isinstance(ts, str):
+        # check for empty string
+        if not ts:
+            return None
+
         # FEAT: improve list
         formats = DATE_FORMATS
         if date_format is not None:
@@ -332,12 +336,12 @@ def make_unaware(dt: Union[datetime, Any], tz: Union[str, tzinfo, timezone] = "U
     Returns:
         datetime object without timezone info
     '''
+    # ensure the datetime is safe
+    dt = any_to_datetime(dt)
+
     # check against None values
     if dt is None:
         return None
-
-    # ensure the datetime is safe
-    dt = any_to_datetime(dt)
 
     # convert the timezone
     return localize_datetime(dt, tz).replace(tzinfo=None)
