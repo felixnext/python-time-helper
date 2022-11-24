@@ -1,6 +1,6 @@
-'''
+"""
 All conversion function. This includes conversions between different datetimes.
-'''
+"""
 
 from datetime import datetime, date, tzinfo, time
 from dateutil import parser
@@ -15,9 +15,7 @@ except ImportError:
 try:
     import pandas as pd
     from pandas import Series, DataFrame
-    from pandas.api.types import (
-        is_datetime64_any_dtype as is_datetime
-    )
+    from pandas.api.types import is_datetime64_any_dtype as is_datetime
     from pandas import to_datetime
 except Exception:
     pd = None
@@ -37,8 +35,10 @@ from time_helper.const import DATE_FORMATS
 from time_helper.timezone import current_timezone, find_timezone
 
 
-def parse_time(time_str: str, format: str, timezone: Union[tzinfo, timezone, str]) -> datetime:
-    '''Parses the given time based on the format and timezone (if provdied).
+def parse_time(
+    time_str: str, format: str, timezone: Union[tzinfo, timezone, str]
+) -> datetime:
+    """Parses the given time based on the format and timezone (if provdied).
 
     Args:
         time_str: String value that should be parsed
@@ -47,7 +47,7 @@ def parse_time(time_str: str, format: str, timezone: Union[tzinfo, timezone, str
 
     Returns:
         (timzone-aware) datetime object
-    '''
+    """
     # check the current timezone
     timezone = find_timezone(timezone)
 
@@ -61,8 +61,10 @@ def parse_time(time_str: str, format: str, timezone: Union[tzinfo, timezone, str
     return dt
 
 
-def unix_to_datetime(ts: Union[str, int, float, Any], tz: Union[timezone, str, Any] = None) -> datetime:
-    '''Converts the given objects into a datetime.
+def unix_to_datetime(
+    ts: Union[str, int, float, Any], tz: Union[timezone, str, Any] = None
+) -> datetime:
+    """Converts the given objects into a datetime.
 
     Args:
         ts: `int` or `long` that contains the timestamp
@@ -70,13 +72,17 @@ def unix_to_datetime(ts: Union[str, int, float, Any], tz: Union[timezone, str, A
 
     Returns:
         `datetime` object that contains the time
-    '''
+    """
     # check if should be parsed
     if isinstance(ts, str):
         try:
             ts = int(ts)
         except Exception:
-            raise ValueError("Unable to convert object ({}) into a valid int or long item!".format(ts))
+            raise ValueError(
+                "Unable to convert object ({}) into a valid int or long item!".format(
+                    ts
+                )
+            )
     # check if can be converted
     if isinstance(ts, int):
         # convert to datetime
@@ -85,14 +91,20 @@ def unix_to_datetime(ts: Union[str, int, float, Any], tz: Union[timezone, str, A
         if tz is not None:
             dt = localize_datetime(dt, tz)
         else:
-            print("WARNING: No timezone given for timestamp, infering 'UTC' as default!")
+            print(
+                "WARNING: No timezone given for timestamp, infering 'UTC' as default!"
+            )
         return dt
     else:
-        raise ValueError("Given object ({}) is not a valid int or long item!".format(ts))
+        raise ValueError(
+            "Given object ({}) is not a valid int or long item!".format(ts)
+        )
 
 
-def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, date_format: str = None) -> datetime:
-    '''Generates a safe datetime from the input information.
+def any_to_datetime(
+    ts: Union[str, datetime, date, Any], logger: Logger = None, date_format: str = None
+) -> datetime:
+    """Generates a safe datetime from the input information.
 
     Args:
         ts: object to convert to datetime
@@ -101,7 +113,7 @@ def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, 
 
     Returns:
         `datetime` object if converted or `None`
-    '''
+    """
     dt = None
 
     # check if special case
@@ -109,7 +121,7 @@ def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, 
         return ts
 
     # check if only date
-    if isinstance(ts, date):
+    if isinstance(ts, date) and not isinstance(ts, datetime):
         dt = datetime.combine(ts, datetime.min.time())
 
     # convert from int or string
@@ -144,7 +156,7 @@ def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, 
                         logger.info(f"Date-Format '{fmt}' did not work")
 
     # check if only date
-    if isinstance(dt, date):
+    if isinstance(dt, date) and not isinstance(dt, datetime):
         dt = datetime.combine(dt, datetime.min.time())
 
     # check for additional types
@@ -166,7 +178,7 @@ def any_to_datetime(ts: Union[str, datetime, date, Any], logger: Logger = None, 
 
 
 def convert_to_datetime(dt, baseline=None, remove_tz=False):
-    '''Converts the given data to datetime.
+    """Converts the given data to datetime.
 
     This might include conversions from date and time data-types
 
@@ -177,7 +189,7 @@ def convert_to_datetime(dt, baseline=None, remove_tz=False):
 
     Returns:
         datetime object
-    '''
+    """
     # check baseline
     if baseline is None:
         baseline = datetime.now()
@@ -186,7 +198,9 @@ def convert_to_datetime(dt, baseline=None, remove_tz=False):
     if isinstance(dt, datetime):
         pass
     elif isinstance(dt, time):
-        dt = datetime(baseline.year, baseline.month, baseline.day, dt.hour, dt.minute, dt.second)
+        dt = datetime(
+            baseline.year, baseline.month, baseline.day, dt.hour, dt.minute, dt.second
+        )
     elif isinstance(dt, date):
         dt = datetime(dt.year, dt.month, dt.day, 12, 0)
     else:
@@ -200,12 +214,12 @@ def convert_to_datetime(dt, baseline=None, remove_tz=False):
 
 
 def localize_datetime(dt: datetime, tz: Union[Any, str, timezone] = None) -> datetime:
-    '''Localizes a datetime to the current timezone.
+    """Localizes a datetime to the current timezone.
 
     Args:
         dt (datetime): Datetime to make aware
         tz (str, timezone): Timezone (either directly or name of the timezone)
-    '''
+    """
     # check if None
     if dt is None:
         return None
@@ -223,8 +237,13 @@ def localize_datetime(dt: datetime, tz: Union[Any, str, timezone] = None) -> dat
         return dt.astimezone(tz)
 
 
-def make_aware(dt: Union[datetime, str, Any], tz: Union[str, timezone, Any] = None, force_convert: bool = True, col: str = None) -> Union[datetime, Any]:
-    '''Checks if the current datetime is aware, otherwise make aware.
+def make_aware(
+    dt: Union[datetime, str, Any],
+    tz: Union[str, timezone, Any] = None,
+    force_convert: bool = True,
+    col: str = None,
+) -> Union[datetime, Any]:
+    """Checks if the current datetime is aware, otherwise make aware.
 
     Args:
         dt (datetime): Datetime to convert
@@ -234,7 +253,7 @@ def make_aware(dt: Union[datetime, str, Any], tz: Union[str, timezone, Any] = No
 
     Returns:
         Updated datetime (or pandas object)
-    '''
+    """
     # ensure that data is not none
     if dt is None:
         return None
@@ -266,8 +285,10 @@ def make_aware(dt: Union[datetime, str, Any], tz: Union[str, timezone, Any] = No
     return localize_datetime(dt, tz)
 
 
-def make_aware_pandas(df: Union[Series, DataFrame], col: str, format=None, tz=None) -> Union[Series, DataFrame]:
-    '''This will make the pandas column datetime aware in the specified timezone.
+def make_aware_pandas(
+    df: Union[Series, DataFrame], col: str, format=None, tz=None
+) -> Union[Series, DataFrame]:
+    """This will make the pandas column datetime aware in the specified timezone.
 
     Defaults the data to the current timezone.
 
@@ -279,7 +300,7 @@ def make_aware_pandas(df: Union[Series, DataFrame], col: str, format=None, tz=No
 
     Returns:
         Updated DataFrame
-    '''
+    """
     # check if pandas is install
     if not Series or not DataFrame:
         raise ImportError("Pandas Library is not installed")
@@ -290,7 +311,9 @@ def make_aware_pandas(df: Union[Series, DataFrame], col: str, format=None, tz=No
     if col is None:
         raise ValueError("Expected column name, but got None")
     if col not in df:
-        raise RuntimeError(f"The specified column {col} is not available in the dataframe: {df.columns}")
+        raise RuntimeError(
+            f"The specified column {col} is not available in the dataframe: {df.columns}"
+        )
 
     # make sure the data is unaware
     if not is_datetime(df[col]):
@@ -310,7 +333,7 @@ def make_aware_pandas(df: Union[Series, DataFrame], col: str, format=None, tz=No
 
     # TODO: update timezone ensurances
     # ensure timezone
-    if not hasattr(df[col].iloc[0], 'tzinfo') or not df[col].iloc[0].tzinfo:
+    if not hasattr(df[col].iloc[0], "tzinfo") or not df[col].iloc[0].tzinfo:
         cur_tz = current_timezone().key
         try:
             df[col] = df[col].dt.tz_localize(cur_tz)
@@ -326,8 +349,10 @@ def make_aware_pandas(df: Union[Series, DataFrame], col: str, format=None, tz=No
     return df
 
 
-def make_unaware(dt: Union[datetime, Any], tz: Union[str, tzinfo, timezone] = "UTC") -> datetime:
-    '''Makes the given timezone unaware in a default timezone.
+def make_unaware(
+    dt: Union[datetime, Any], tz: Union[str, tzinfo, timezone] = "UTC"
+) -> datetime:
+    """Makes the given timezone unaware in a default timezone.
 
     Args:
         dt: Datetime to convert
@@ -335,7 +360,7 @@ def make_unaware(dt: Union[datetime, Any], tz: Union[str, tzinfo, timezone] = "U
 
     Returns:
         datetime object without timezone info
-    '''
+    """
     # ensure the datetime is safe
     dt = any_to_datetime(dt)
 
