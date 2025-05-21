@@ -4,7 +4,7 @@ All conversion function. This includes conversions between different datetimes.
 
 from datetime import datetime, date, tzinfo, time
 from dateutil import parser
-from typing import Any, Union
+from typing import Any, Union, Optional
 from logging import Logger
 
 # try to import various dependend libraries
@@ -213,7 +213,9 @@ def convert_to_datetime(dt, baseline=None, remove_tz=False):
     return dt
 
 
-def localize_datetime(dt: datetime, tz: Union[Any, str, timezone] = None) -> datetime:
+def localize_datetime(
+    dt: Optional[datetime], tz: Optional[Union[Any, str, timezone]] = None
+) -> Optional[datetime]:
     """Localizes a datetime to the current timezone.
 
     Args:
@@ -241,15 +243,15 @@ def make_aware(
     dt: Union[datetime, str, Any],
     tz: Union[str, timezone, Any] = None,
     force_convert: bool = True,
-    col: str = None,
+    col: Optional[str] = None,
 ) -> Union[datetime, Any]:
     """Checks if the current datetime is aware, otherwise make aware.
 
     Args:
-        dt (datetime): Datetime to convert
-        tz (str): Name of the timezone to convert to
+        dt (datetime, str, Any): Datetime to convert
+        tz (str, ZoneInfo, Any): Name of the timezone to convert to
         force_convert (bool): Defines if the timezone should be converted if there is already a timezone present
-        col (str): Column used if the input is pandas Dataframe
+        col (str, None): Column used if the input is pandas Dataframe
 
     Returns:
         Updated datetime (or pandas object)
@@ -266,6 +268,7 @@ def make_aware(
         pass
 
     if is_pandas:
+        assert col is not None, "Column is required for pandas objects"
         return make_aware_pandas(dt, col, tz=tz)
 
     # make sure dt is datetime

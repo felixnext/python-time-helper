@@ -6,3 +6,5 @@ dist/*
 
 .eggs
 *.egg-info
+
+.venv
