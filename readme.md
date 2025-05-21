@@ -19,6 +19,15 @@ make_aware("2022-03-10")
 # > datetime.datetime(2022, 3, 10, 0, 0, tzinfo=backports.zoneinfo.ZoneInfo(key='CET'))
 ```
 
+## Development
+
+Install the packages through `uv`:
+
+```bash
+uv sync
+uv run pytest
+```
+
 ## Library Logic
 
 The library is build to extend around various datetime objects (such as python internal datetime, date, as well as np.datetime).

@@ -27,6 +27,9 @@ def test_findtz():
     tz = find_timezone("foobar")
     assert tz is None
 
+    tz = find_timezone("IST")
+    assert tz is not None
+    assert tz == zoneinfo.ZoneInfo("Asia/Kolkata")
 
 def test_currenttz():
     tz = current_timezone()

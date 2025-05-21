@@ -152,7 +152,7 @@ def test_aware():
     # check error cases
     val = make_aware(None, col=None)
     assert val is None
-    with pytest.raises(ValueError):
+    with pytest.raises(AssertionError):
         make_aware(df, col=None)
     with pytest.raises(RuntimeError):
         make_aware(df, col="no_col")
