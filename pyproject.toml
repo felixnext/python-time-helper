@@ -3,8 +3,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "python-time-helper"
-version = "0.1.0"
+name = "time-helper"
+version = "0.1.6"
 description = "A Python time helper library"
 readme = "readme.md"
 requires-python = ">=3.8"
