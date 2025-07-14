@@ -1,14 +1,21 @@
-'''
-This contains all range operations (such as intervals).
-'''
+"""This contains all range operations (such as intervals)."""
 
-from datetime import timedelta, datetime
+from __future__ import annotations
 
-from time_helper import convert_to_datetime, any_to_datetime
+from datetime import datetime, timedelta
+from typing import Any
+
+from time_helper import any_to_datetime, convert_to_datetime
 
 
-def time_to_interval(dt, offset: int = 12, baseline=None, zero_center=True, normalize=True):
-    '''Converts a datetime value into an interval along the day.
+def time_to_interval(
+    dt: Any,
+    offset: int | tuple[int, int] | list[int] = 12,
+    baseline: datetime | None = None,
+    zero_center: bool = True,
+    normalize: bool = True,
+) -> float:
+    """Converts a datetime value into an interval along the day.
 
     In case of normalization the data is ranged from 0 to 1 (for the timestamp +- offset)
     If zero_center is enabled this range shifts to [-.5, .5]
@@ -23,7 +30,7 @@ def time_to_interval(dt, offset: int = 12, baseline=None, zero_center=True, norm
 
     Returns:
         Float value of the time position - if normalized a value between 0 and 1 (1 = last possible time) - otherwise a value in minutes
-    '''
+    """
     # convert to unaware
     dt_base = convert_to_datetime(baseline, None, True) if baseline else None
     dt_uw = convert_to_datetime(dt, baseline, True)
@@ -46,7 +53,7 @@ def time_to_interval(dt, offset: int = 12, baseline=None, zero_center=True, norm
 
     # check for centering
     if zero_center:
-        dt_min -= (total_min / 2)
+        dt_min -= total_min / 2
 
     # check for normalization
     if normalize:
@@ -55,8 +62,14 @@ def time_to_interval(dt, offset: int = 12, baseline=None, zero_center=True, norm
     return dt_min
 
 
-def create_intervals(start, end=None, interval=6, round_days=False, skip=timedelta(seconds=1)):
-    '''Generates an array of interval tuples for the given date range.
+def create_intervals(
+    start: Any,
+    end: Any = None,
+    interval: int | float | timedelta = 6,
+    round_days: bool = False,
+    skip: timedelta = timedelta(seconds=1),
+) -> list[tuple[datetime, datetime]]:
+    """Generates an array of interval tuples for the given date range.
 
     Args:
         start (datetime): The to start at
@@ -66,10 +79,20 @@ def create_intervals(start, end=None, interval=6, round_days=False, skip=timedel
 
     Returns:
         List of datetime tuples (note that these are timezone aware) of start and end date
-    '''
+    """
     # update the start and end dates
     start_date = any_to_datetime(start)
-    end_date = datetime.utcnow() if end is None else any_to_datetime(end)
+    if start_date is None:
+        raise ValueError("Failed to parse start date")
+
+    if end is None:
+        end_date = datetime.utcnow()
+    else:
+        parsed_end = any_to_datetime(end)
+        if parsed_end is None:
+            raise ValueError("Failed to parse end date")
+        end_date = parsed_end
+
     if round_days:
         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
         end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
@@ -82,8 +105,8 @@ def create_intervals(start, end=None, interval=6, round_days=False, skip=timedel
             raise ValueError("Invalid interval passed")
 
     # convert to range
-    date_range = []
-    d_start = start_date
+    date_range: list[tuple[datetime, datetime]] = []
+    d_start: datetime = start_date
     while d_start < end_date:
         # update new item
         d_end = min(end_date, d_start + interval)

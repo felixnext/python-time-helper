@@ -1,13 +1,11 @@
+from datetime import datetime, tzinfo
 
-from datetime import tzinfo, datetime
-
-import pytest
 try:
     import zoneinfo
 except ImportError:
     import backports.zoneinfo as zoneinfo
 
-from time_helper import find_timezone, current_timezone
+from time_helper import current_timezone, find_timezone
 
 LOCAL_TZ = datetime.now().astimezone().tzname()
 LOCAL_TZ = "CET" if LOCAL_TZ == "CEST" else LOCAL_TZ
@@ -30,6 +28,7 @@ def test_findtz():
     tz = find_timezone("IST")
     assert tz is not None
     assert tz == zoneinfo.ZoneInfo("Asia/Kolkata")
+
 
 def test_currenttz():
     tz = current_timezone()
