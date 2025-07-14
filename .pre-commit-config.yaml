@@ -1,0 +1,24 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: Ruff check
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+        require_serial: true
+        
+      - id: ruff-format
+        name: Ruff format
+        entry: uv run ruff format
+        language: system
+        types: [python]
+        require_serial: true
+        
+      - id: mypy
+        name: MyPy type checking
+        entry: uv run mypy time_helper
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true

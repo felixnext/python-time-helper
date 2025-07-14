@@ -1,23 +1,22 @@
-
 from datetime import datetime, timedelta
 
 from time_helper import time_to_interval
 
 
 def test_time_to_interval():
-    '''Tests if the conversion is correct'''
+    """Tests if the conversion is correct"""
     dt = datetime(2020, 9, 23, 12, 00)
     iv = time_to_interval(dt, 0)
     assert iv == 0
 
     iv = time_to_interval(dt, 0, zero_center=False, normalize=True)
-    assert iv == .5
+    assert iv == 0.5
 
     iv = time_to_interval(dt, 12)
     assert iv == 0
 
     iv = time_to_interval(dt, 12, zero_center=False, normalize=True)
-    assert iv == .5
+    assert iv == 0.5
 
     iv = time_to_interval(dt, 12, zero_center=False, normalize=False)
     assert iv == 24 * 60

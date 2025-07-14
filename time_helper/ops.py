@@ -1,29 +1,35 @@
-'''
-Contains a range of operations on different datetimes.
-'''
+"""Contains a range of operations on different datetimes."""
 
-from datetime import datetime, date, timedelta
-from typing import Union
+from __future__ import annotations
+
+from datetime import date, datetime, timedelta
+from typing import Any
 
 try:
-    from pandas import Series, DataFrame
-    from pandas.api.types import (
-        is_datetime64_any_dtype as is_datetime
-    )
+    from pandas import DataFrame, Series
+    from pandas.api.types import is_datetime64_any_dtype as is_datetime
 except Exception:
-    Series = None
-    DataFrame = None
-    is_datetime = lambda x: False
+    Series = None  # type: ignore[assignment,misc]
+    DataFrame = None  # type: ignore[assignment,misc]
 
-from time_helper.convert import make_aware, any_to_datetime, localize_datetime
+    def is_datetime(x: Any) -> bool:  # type: ignore[misc] # noqa: ARG001
+        """Mock function when pandas is not installed."""
+        return False
 
 
-def has_timezone(df: Union[Series, DataFrame], col: str = None) -> bool:
-    '''Checks if a given pandas object has a timezone.
+from time_helper.convert import any_to_datetime, localize_datetime, make_aware
+
+
+def has_timezone(df: Series | DataFrame, col: str | None = None) -> bool:
+    """Checks if a given pandas object has a timezone.
 
     Args:
+        df: Pandas DataFrame or Series to check
+        col: Column name if df is a DataFrame
 
-    '''
+    Returns:
+        True if the object has timezone information, False otherwise
+    """
     # perform security
     if df is None:
         raise ValueError("Expected a dataframe but got None")
@@ -42,15 +48,13 @@ def has_timezone(df: Union[Series, DataFrame], col: str = None) -> bool:
     # perform checks
     df_col = df if isinstance(df, Series) else df[col]
     obj = df_col.iloc[0]
-    if not hasattr(obj, 'tzinfo'):
+    if not hasattr(obj, "tzinfo"):
         return False
-    if obj.tzinfo is None:
-        return False
-    return True
+    return obj.tzinfo is not None
 
 
-def time_diff(dt1: datetime, dt2: datetime, tz=None) -> timedelta:
-    '''Allows to compute the difference between datetimes of different timezones.
+def time_diff(dt1: datetime, dt2: datetime, tz: str | Any = None) -> timedelta:
+    """Allows to compute the difference between datetimes of different timezones.
 
     Calculates dt1 - dt2
 
@@ -61,27 +65,37 @@ def time_diff(dt1: datetime, dt2: datetime, tz=None) -> timedelta:
 
     Returns:
         timedelta
-    '''
+    """
     # check for unaware
     if dt1.tzinfo is None and dt2.tzinfo is None:
         return dt1 - dt2
 
     # update timezones
     if dt1.tzinfo is None:
-        dt1 = make_aware(dt1, tz, force_convert=False)
+        dt1_aware = make_aware(dt1, tz, force_convert=False)
+        if not isinstance(dt1_aware, datetime):
+            raise ValueError("Failed to make dt1 aware")
+        dt1 = dt1_aware
     if dt2.tzinfo is None:
-        dt2 = make_aware(dt2, tz, force_convert=False)
+        dt2_aware = make_aware(dt2, tz, force_convert=False)
+        if not isinstance(dt2_aware, datetime):
+            raise ValueError("Failed to make dt2 aware")
+        dt2 = dt2_aware
 
     # bring both datetimes to same timezone
-    dt1 = localize_datetime(dt1, 'UTC')
-    dt2 = localize_datetime(dt2, 'UTC')
+    dt1_utc = localize_datetime(dt1, "UTC")
+    dt2_utc = localize_datetime(dt2, "UTC")
+    if dt1_utc is None or dt2_utc is None:
+        raise ValueError("Failed to localize to UTC")
+    dt1 = dt1_utc
+    dt2 = dt2_utc
 
     # calculate
     return dt1 - dt2
 
 
-def round_time(dt: datetime, freq: str = "D", max_out: bool = False) -> datetime:
-    '''Rounds the given timestamp to the start or end of the day.
+def round_time(dt: datetime, freq: str = "D", max_out: bool = False) -> datetime | None:
+    """Rounds the given timestamp to the start or end of the day.
 
     Args:
         timestamp (datetime): Datetime that should be rounded
@@ -90,7 +104,7 @@ def round_time(dt: datetime, freq: str = "D", max_out: bool = False) -> datetime
 
     Returns:
         Updated datetime
-    '''
+    """
     # check if value is provided
     if not dt:
         return None
@@ -125,6 +139,6 @@ def round_time(dt: datetime, freq: str = "D", max_out: bool = False) -> datetime
     if freq in ["Y"]:
         items["month"] = 12 if max_out else 1
         items["day"] = 31 if max_out else items["day"]
-    dt = dt.replace(**items)
+    dt = dt.replace(**items)  # type: ignore[arg-type]
 
     return dt

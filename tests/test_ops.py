@@ -1,10 +1,9 @@
-
 from datetime import datetime, timedelta
 
-import pytest
 import pandas as pd
+import pytest
 
-from time_helper import time_diff, localize_datetime, has_timezone, round_time
+from time_helper import has_timezone, localize_datetime, round_time, time_diff
 
 
 def test_diff():
@@ -20,24 +19,24 @@ def test_diff():
     assert diff2 == -orig_diff
 
     # localize to first timezone
-    date1_utc = localize_datetime(date1, 'UTC')
-    diff1 = time_diff(date2, date1_utc, 'UTC')
+    date1_utc = localize_datetime(date1, "UTC")
+    diff1 = time_diff(date2, date1_utc, "UTC")
     assert diff1 == orig_diff
-    diff2 = time_diff(date1_utc, date2, 'UTC')
+    diff2 = time_diff(date1_utc, date2, "UTC")
     assert diff2 == -orig_diff
 
     # localize further should not change inherit time
-    date1_cal = localize_datetime(date1_utc, 'Asia/Calcutta')
-    diff1 = time_diff(date2, date1_utc, 'UTC')
+    date1_cal = localize_datetime(date1_utc, "Asia/Calcutta")
+    diff1 = time_diff(date2, date1_utc, "UTC")
     assert diff1 == orig_diff
 
     # test different timezones (times are then compared in utc, so diff should remove 1 hour)
-    date2_cet = localize_datetime(date2, 'Europe/Berlin')
+    date2_cet = localize_datetime(date2, "Europe/Berlin")
     diff1 = time_diff(date2_cet, date1_utc)
     assert diff1 == orig_diff - timedelta(hours=1)
 
     # convert the other timezone
-    date1_cal = localize_datetime(date1, 'Asia/Calcutta')
+    date1_cal = localize_datetime(date1, "Asia/Calcutta")
     diff1 = time_diff(date2_cet, date1_cal)
     assert diff1 == orig_diff + timedelta(hours=4, minutes=30)
 
@@ -49,12 +48,9 @@ def test_pandas_timezone():
                 pd.Timestamp("2020-06-06").tz_localize("Europe/Berlin"),
                 "foo",
             ],
-            [
-                pd.Timestamp("2020-06-06").tz_localize("Europe/Berlin"),
-                "bar"
-            ]
+            [pd.Timestamp("2020-06-06").tz_localize("Europe/Berlin"), "bar"],
         ],
-        columns=["date", "text"]
+        columns=["date", "text"],
     )
 
     # check error cases
@@ -78,12 +74,9 @@ def test_pandas_timezone():
                 pd.Timestamp("2020-06-06"),
                 "foo",
             ],
-            [
-                pd.Timestamp("2020-06-06"),
-                "bar"
-            ]
+            [pd.Timestamp("2020-06-06"), "bar"],
         ],
-        columns=["date", "text"]
+        columns=["date", "text"],
     )
     val = has_timezone(df, "date")
     assert val is False
