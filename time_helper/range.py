@@ -86,7 +86,7 @@ def create_intervals(
         raise ValueError("Failed to parse start date")
 
     if end is None:
-        end_date = datetime.utcnow()
+        end_date = datetime.now()
     else:
         parsed_end = any_to_datetime(end)
         if parsed_end is None:
