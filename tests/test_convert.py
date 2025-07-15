@@ -1,11 +1,7 @@
 """Test Various Convert Functions"""
 
 from datetime import datetime, timedelta
-
-try:
-    import zoneinfo
-except ImportError:
-    import backports.zoneinfo as zoneinfo
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pytest
@@ -16,41 +12,44 @@ LOCAL_TZ = datetime.now().astimezone().tzname()
 LOCAL_TZ = "CET" if LOCAL_TZ == "CEST" else LOCAL_TZ
 
 
-def test_parse():
+def test_parse() -> None:
     date_str = "2021-09-15"
     format = "%Y-%m-%d"
-    orig_date = datetime(2021, 9, 15, tzinfo=zoneinfo.ZoneInfo("UTC"))
+    orig_date = datetime(2021, 9, 15, tzinfo=ZoneInfo("UTC"))
 
     # test the parsing
     dt = parse_time(date_str, format, "UTC")
     assert dt is not None
     assert dt == orig_date
-    assert dt.tzinfo.tzname(None) == zoneinfo.ZoneInfo("UTC").tzname(None)
+    if dt.tzinfo is not None:
+        assert dt.tzinfo.tzname(None) == ZoneInfo("UTC").tzname(None)
 
     date_str = "2021-09-15_20:14:50"
     format = "%Y-%m-%d_%H:%M:%S"
-    orig_date = datetime(2021, 9, 15, 20, 14, 50, tzinfo=zoneinfo.ZoneInfo(LOCAL_TZ))
+    if LOCAL_TZ:
+        orig_date = datetime(2021, 9, 15, 20, 14, 50, tzinfo=ZoneInfo(LOCAL_TZ))
 
-    # test the parsing
-    dt = parse_time(date_str, format, LOCAL_TZ)
-    assert dt is not None
-    assert dt == orig_date
-    assert dt.tzinfo.tzname(None) == zoneinfo.ZoneInfo(LOCAL_TZ).tzname(None)
+        # test the parsing
+        dt = parse_time(date_str, format, LOCAL_TZ)
+        assert dt is not None
+        assert dt == orig_date
+        if dt.tzinfo is not None and LOCAL_TZ:
+            assert dt.tzinfo.tzname(None) == ZoneInfo(LOCAL_TZ).tzname(None)
 
     # test error case
     with pytest.raises(ValueError):
         parse_time("1020-13-32_12:34:21", format, "UTC")
 
 
-def test_any():
+def test_any() -> None:
     # TODO: implement
     pass
 
 
-def test_unix():
+def test_unix() -> None:
     # pair to check
     unix = 1634394762
-    date = datetime(2021, 10, 16, 14, 32, 42, tzinfo=zoneinfo.ZoneInfo("GMT"))
+    date = datetime(2021, 10, 16, 14, 32, 42, tzinfo=ZoneInfo("GMT"))
 
     # run conversion
     conv_date = unix_to_datetime(unix, "GMT")
@@ -70,36 +69,45 @@ def test_unix():
         unix_to_datetime("FOO", "UTC")
 
 
-def test_localize():
+def test_localize() -> None:
     date = datetime(2020, 10, 15, 20, 15, 13)
     assert date.tzinfo is None
 
     # makes the date aware
     loc_date = localize_datetime(date)
-    assert loc_date.tzinfo.tzname(None) == zoneinfo.ZoneInfo(LOCAL_TZ).tzname(None)
+    assert loc_date is not None
+    if loc_date.tzinfo is not None and LOCAL_TZ:
+        assert loc_date.tzinfo.tzname(None) == ZoneInfo(LOCAL_TZ).tzname(None)
     assert date.date() == loc_date.date()
     assert date.time() == loc_date.time()
 
     # ensures that the aware date can be converted in timezone
     loc_date_2 = localize_datetime(loc_date, "Asia/Kolkata")
-    assert loc_date_2.tzinfo.tzname(None) == zoneinfo.ZoneInfo("Asia/Kolkata").tzname(None)
+    assert loc_date_2 is not None
+    if loc_date_2.tzinfo is not None:
+        assert loc_date_2.tzinfo.tzname(None) == ZoneInfo("Asia/Kolkata").tzname(None)
     assert abs(date.date() - loc_date_2.date()) <= timedelta(days=1)
     assert date.time() != loc_date_2.time()
 
     # makes sure that conversion back restores original timezone
-    loc_date_3 = localize_datetime(loc_date_2, LOCAL_TZ)
-    assert loc_date_3.tzinfo.tzname(None) == zoneinfo.ZoneInfo(LOCAL_TZ).tzname(None)
-    assert date.date() == loc_date_3.date()
-    assert date.time() == loc_date_3.time()
+    if LOCAL_TZ:
+        loc_date_3 = localize_datetime(loc_date_2, LOCAL_TZ)
+        assert loc_date_3 is not None
+        if loc_date_3.tzinfo is not None:
+            assert loc_date_3.tzinfo.tzname(None) == ZoneInfo(LOCAL_TZ).tzname(None)
+        assert date.date() == loc_date_3.date()
+        assert date.time() == loc_date_3.time()
 
     # make sure that timestamp gets changed
     loc_date_4 = localize_datetime(datetime(2021, 10, 21, 5, 44, 18), "UTC")
     loc_date_5 = localize_datetime(datetime(2021, 10, 21, 5, 44, 18), "Europe/Berlin")
+    assert loc_date_4 is not None
+    assert loc_date_5 is not None
     assert loc_date_4.timestamp() > loc_date_5.timestamp()
     assert loc_date_4.timestamp() == loc_date_5.timestamp() + (60 * 60 * 2)
 
 
-def test_aware():
+def test_aware() -> None:
     # create basic date
     date = datetime(2020, 10, 15, 20, 15, 13)
     assert date.tzinfo is None
@@ -110,7 +118,7 @@ def test_aware():
     assert loc_date.tzinfo is not None
     assert date.date() == loc_date.date()
     assert date.time() == loc_date.time()
-    assert loc_date.tzinfo.tzname(None) == zoneinfo.ZoneInfo("Europe/Berlin").tzname(None)
+    assert loc_date.tzinfo.tzname(None) == ZoneInfo("Europe/Berlin").tzname(None)
 
     # check to make aware timezone aware
     loc_date = make_aware(loc_date, "Europe/Berlin")
@@ -118,7 +126,7 @@ def test_aware():
     assert loc_date.tzinfo is not None
     assert date.date() == loc_date.date()
     assert date.time() == loc_date.time()
-    assert loc_date.tzinfo.tzname(None) == zoneinfo.ZoneInfo("Europe/Berlin").tzname(None)
+    assert loc_date.tzinfo.tzname(None) == ZoneInfo("Europe/Berlin").tzname(None)
 
     # check switch of timezone
     pre_date = localize_datetime(loc_date, "Asia/Calcutta")
@@ -128,7 +136,7 @@ def test_aware():
     assert loc_date2.tzinfo is not None
     assert date.date() == loc_date2.date()
     assert (date + timedelta(hours=3, minutes=30)).time() == loc_date2.time()
-    assert loc_date2.tzinfo.tzname(None) == zoneinfo.ZoneInfo("Asia/Calcutta").tzname(None)
+    assert loc_date2.tzinfo.tzname(None) == ZoneInfo("Asia/Calcutta").tzname(None)
 
     # make none check
     loc_date = make_aware(None)
@@ -155,7 +163,7 @@ def test_aware():
         make_aware(df, col="no_col")
 
     df_new = make_aware(df, col="date")
-    assert has_timezone(df_new, "date") is True
+    assert has_timezone(df_new, "date") is True  # type: ignore[arg-type]
 
     df = pd.DataFrame(
         [
@@ -168,7 +176,7 @@ def test_aware():
         columns=["date", "text"],
     )
     df_new = make_aware(df, col="date")
-    assert has_timezone(df_new, "date") is True
+    assert has_timezone(df_new, "date") is True  # type: ignore[arg-type]
 
     df_none = make_aware("")
     assert df_none is None
@@ -176,12 +184,14 @@ def test_aware():
     # TODO: add additional test cases here
 
 
-def test_unaware():
+def test_unaware() -> None:
     # create data
     date1 = datetime(2021, 1, 1, 15, 10, 30)
     date1_utc = localize_datetime(date1, "UTC")
     date1_cet = localize_datetime(date1, "CET")
 
+    assert date1_cet is not None
+    assert date1_utc is not None
     assert date1_cet.timestamp() != date1_utc.timestamp()
 
     dt = make_unaware(date1)

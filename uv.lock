@@ -496,19 +496,27 @@ wheels = [
 
 [[package]]
 name = "time-helper"
-version = "0.2.0"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
-    { name = "numpy" },
-    { name = "pandas" },
     { name = "python-dateutil" },
     { name = "pytz" },
     { name = "tzdata" },
 ]
 
+[package.optional-dependencies]
+numpy = [
+    { name = "numpy" },
+]
+pandas = [
+    { name = "pandas" },
+]
+
 [package.dev-dependencies]
 dev = [
     { name = "mypy" },
+    { name = "numpy" },
+    { name = "pandas" },
     { name = "pandas-stubs" },
     { name = "pre-commit" },
     { name = "pytest" },
@@ -520,16 +528,19 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "numpy", specifier = ">=1.22.3" },
-    { name = "pandas", specifier = ">=1.4.1" },
+    { name = "numpy", marker = "extra == 'numpy'", specifier = ">=1.22.3" },
+    { name = "pandas", marker = "extra == 'pandas'", specifier = ">=1.4.1" },
     { name = "python-dateutil", specifier = ">=2.8.2" },
     { name = "pytz", specifier = ">=2022.1" },
     { name = "tzdata", specifier = ">=2022.1" },
 ]
+provides-extras = ["pandas", "numpy"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "mypy", specifier = ">=1.0" },
+    { name = "numpy", specifier = ">=1.22.3" },
+    { name = "pandas", specifier = ">=1.4.1" },
     { name = "pandas-stubs", specifier = ">=2.0.0" },
     { name = "pre-commit", specifier = ">=3.5.0" },
     { name = "pytest", specifier = ">=7.0" },

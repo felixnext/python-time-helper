@@ -6,7 +6,7 @@ import pytest
 from time_helper import has_timezone, localize_datetime, round_time, time_diff
 
 
-def test_diff():
+def test_diff() -> None:
     # setup the data
     date1 = datetime(2021, 1, 1, 15, 10, 30)
     date2 = datetime(2021, 1, 10, 18, 20, 50)
@@ -20,6 +20,7 @@ def test_diff():
 
     # localize to first timezone
     date1_utc = localize_datetime(date1, "UTC")
+    assert date1_utc is not None
     diff1 = time_diff(date2, date1_utc, "UTC")
     assert diff1 == orig_diff
     diff2 = time_diff(date1_utc, date2, "UTC")
@@ -27,21 +28,24 @@ def test_diff():
 
     # localize further should not change inherit time
     date1_cal = localize_datetime(date1_utc, "Asia/Calcutta")
+    assert date1_cal is not None
     diff1 = time_diff(date2, date1_utc, "UTC")
     assert diff1 == orig_diff
 
     # test different timezones (times are then compared in utc, so diff should remove 1 hour)
     date2_cet = localize_datetime(date2, "Europe/Berlin")
+    assert date2_cet is not None
     diff1 = time_diff(date2_cet, date1_utc)
     assert diff1 == orig_diff - timedelta(hours=1)
 
     # convert the other timezone
-    date1_cal = localize_datetime(date1, "Asia/Calcutta")
-    diff1 = time_diff(date2_cet, date1_cal)
+    date1_cal2 = localize_datetime(date1, "Asia/Calcutta")
+    assert date1_cal2 is not None
+    diff1 = time_diff(date2_cet, date1_cal2)
     assert diff1 == orig_diff + timedelta(hours=4, minutes=30)
 
 
-def test_pandas_timezone():
+def test_pandas_timezone() -> None:
     df = pd.DataFrame(
         [
             [
@@ -55,7 +59,7 @@ def test_pandas_timezone():
 
     # check error cases
     with pytest.raises(ValueError):
-        has_timezone(None, None)
+        has_timezone(None, None)  # type: ignore[arg-type]
     with pytest.raises(ValueError):
         has_timezone(df, None)
     with pytest.raises(ValueError):
@@ -82,7 +86,7 @@ def test_pandas_timezone():
     assert val is False
 
 
-def test_round_time():
+def test_round_time() -> None:
     dt = datetime(2022, 2, 10, 13, 30, 54)
 
     dt_out = round_time(dt, "M", max_out=False)

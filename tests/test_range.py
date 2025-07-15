@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from time_helper import time_to_interval
 
 
-def test_time_to_interval():
+def test_time_to_interval() -> None:
     """Tests if the conversion is correct"""
     dt = datetime(2020, 9, 23, 12, 00)
     iv = time_to_interval(dt, 0)
@@ -67,6 +67,6 @@ def test_time_to_interval():
     assert iv == 15 / 42
 
 
-def test_create_interval():
+def test_create_interval() -> None:
     # TODO: implement
     pass

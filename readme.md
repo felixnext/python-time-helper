@@ -1,13 +1,17 @@
 # Time Helper
 
-Simple helper library to handle different time related tasks in python. This ties into pandas and numpy as well as pytz.
+Simple helper library to handle different time related tasks in python. This lightweight library provides timezone-aware datetime handling with optional pandas/numpy support.
 
 The general idea is to have a bunch of one-stop functions that allow you to easily handle datetime related tasks.
 
 ## Getting Started
 
 ```bash
+# Basic installation (lightweight, no pandas/numpy)
 pip install time-helper
+
+# With pandas/numpy support
+pip install time-helper[pandas]
 ```
 
 Then in python code:
@@ -18,6 +22,15 @@ from time_helper import make_aware
 make_aware("2022-03-10")
 # > datetime.datetime(2022, 3, 10, 0, 0, tzinfo=backports.zoneinfo.ZoneInfo(key='CET'))
 ```
+
+## Optional Dependencies
+
+The library is designed to be lightweight by default. Pandas and numpy support is optional:
+
+- **Basic installation**: Includes only essential dependencies (pytz, python-dateutil, tzdata)
+- **Pandas support**: Install with `pip install time-helper[pandas]` to enable pandas DataFrame/Series datetime operations
+
+When pandas/numpy are not installed, the library provides mock functions that allow the code to run without errors, though pandas-specific functionality will be limited.
 
 ## Development
 

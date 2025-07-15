@@ -2,11 +2,20 @@
 
 from __future__ import annotations
 
+import contextlib
+import logging
 from datetime import date, datetime, time, tzinfo
 from logging import Logger
 from typing import Any
 
 from dateutil import parser
+from pytz import AmbiguousTimeError
+
+from time_helper.const import DATE_FORMATS
+from time_helper.timezone import current_timezone, find_timezone
+
+# Module-level logger
+_logger = logging.getLogger(__name__)
 
 # try to import various dependend libraries
 try:
@@ -38,12 +47,6 @@ try:
 except Exception:
     np = None  # type: ignore[assignment]
     nparray = None  # type: ignore[assignment]
-import contextlib
-
-from pytz import AmbiguousTimeError
-
-from time_helper.const import DATE_FORMATS
-from time_helper.timezone import current_timezone, find_timezone
 
 
 def parse_time(time_str: str, format: str, timezone: tzinfo | timezone | str) -> datetime:
@@ -93,7 +96,7 @@ def unix_to_datetime(ts: str | int | float | Any, tz: timezone | str | Any = Non
                 raise ValueError("Failed to localize datetime")
             dt = dt_result
         else:
-            print("WARNING: No timezone given for timestamp, infering 'UTC' as default!")
+            _logger.warning("No timezone given for timestamp, inferring 'UTC' as default!")
         return dt
     raise ValueError(f"Given object ({ts}) is not a valid int or long item!")
 
@@ -223,7 +226,11 @@ def localize_datetime(dt: datetime | None, tz: Any | str | timezone | None = Non
 
     # update the timezone
     if isinstance(tz, str):
-        tz = timezone(tz)
+        # Use find_timezone to handle abbreviations
+        tz_found = find_timezone(tz)
+        if tz_found is None:
+            raise ValueError(f"Invalid timezone: {tz}")
+        tz = tz_found
 
     # check if timezone should be added or converted
     if dt.tzinfo is None:

@@ -42,13 +42,51 @@ def find_timezone(name: str | tzinfo | timezone) -> tzinfo | None:
 
 
 def current_timezone() -> tzinfo:
-    """Retrieves the currently active timezone."""
-    # retrieve the current timezone name
-    cur = datetime.now().astimezone().tzname()
+    """Retrieves the currently active timezone.
 
-    # special cases
-    # note: this timezone is not available through the data (summer-time)
-    if cur == "CEST":
-        cur = "CET"
+    Returns the system's current timezone as a proper tzinfo object.
+    Handles abbreviations by mapping them to full IANA timezone names.
+    """
+    # Get the system's current timezone directly
+    dt = datetime.now().astimezone()
 
-    return timezone(cur)  # type: ignore[arg-type]
+    # If we already have a proper timezone object, return it
+    if dt.tzinfo is not None and hasattr(dt.tzinfo, "key"):
+        # This is already a proper ZoneInfo object
+        return dt.tzinfo
+
+    # Fall back to tzname and try to map it
+    tzname = dt.tzname()
+
+    if tzname is None:
+        # If no timezone name, return UTC as fallback
+        return timezone("UTC")
+
+    # Check if it's an abbreviation that needs mapping
+    if tzname in IANA_MAPPING:
+        tzname = IANA_MAPPING[tzname]
+
+    # Special case for CEST (not in our mapping)
+    elif tzname == "CEST":
+        tzname = "Europe/Berlin"  # More accurate than CET
+
+    # Try to create timezone object
+    try:
+        return timezone(tzname)
+    except Exception:
+        # If all else fails, try to detect timezone using platform-specific methods
+        try:
+            import os
+            import platform
+
+            # On Unix-like systems, check TZ environment variable
+            if platform.system() != "Windows":
+                tz_env = os.environ.get("TZ")
+                if tz_env:
+                    return timezone(tz_env)
+
+            # Last resort: return UTC
+            return timezone("UTC")
+        except Exception:
+            # Final fallback
+            return timezone("UTC")

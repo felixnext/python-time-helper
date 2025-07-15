@@ -17,4 +17,7 @@ DATE_FORMATS = [
     "%m/%d/%y",
     "%d.%m.%Y",
     "%m.%d.%Y",
+    # ISO 8601 with Z suffix (although isoparse handles these, good for fallback)
+    "%Y-%m-%dT%H:%M:%S.%fZ",
+    "%Y-%m-%dT%H:%M:%SZ",
 ]
