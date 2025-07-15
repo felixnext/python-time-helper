@@ -26,6 +26,10 @@ try:
     from .convert import (
         unix_to_datetime as unix_to_datetime,
     )
+    from .dst import get_dst_transitions as get_dst_transitions
+    from .dst import is_dst_active as is_dst_active
+    from .dst import next_dst_transition as next_dst_transition
+    from .natural import parse_natural as parse_natural
     from .ops import has_timezone as has_timezone
     from .ops import round_time as round_time
     from .ops import time_diff as time_diff
@@ -45,10 +49,14 @@ __all__ = [
     "create_intervals",
     "current_timezone",
     "find_timezone",
+    "get_dst_transitions",
     "has_timezone",
+    "is_dst_active",
     "localize_datetime",
     "make_aware",
     "make_unaware",
+    "next_dst_transition",
+    "parse_natural",
     "parse_time",
     "round_time",
     "time_diff",

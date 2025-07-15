@@ -335,7 +335,8 @@ def make_aware_pandas(
         try:
             df[col] = df[col].dt.tz_localize(cur_tz)
         except AmbiguousTimeError:
-            infer_dst = nparray([False] * df.shape[0])
+            # Use numpy array if available, otherwise use list
+            infer_dst = nparray([False] * df.shape[0]) if nparray is not None else [False] * df.shape[0]
             df[col] = df[col].dt.tz_localize(cur_tz, ambiguous=infer_dst)
     if tz is not None:
         # convert to string (as pandas does not support ZoneInfo)
