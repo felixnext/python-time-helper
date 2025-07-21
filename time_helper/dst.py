@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from typing import TypedDict
 from zoneinfo import ZoneInfo
 
-from time_helper.timezone import find_timezone
+from .timezone import find_timezone
 
 
 class DSTTransition(TypedDict):

@@ -8,8 +8,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
-from time_helper.convert import any_to_datetime, localize_datetime, make_aware, make_unaware
-from time_helper.ops import round_time, time_diff
+from .convert import any_to_datetime, localize_datetime, make_aware, make_unaware
+from .ops import round_time, time_diff
 
 if TYPE_CHECKING:
     from datetime import tzinfo
