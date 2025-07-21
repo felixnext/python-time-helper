@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any
 
-from time_helper import any_to_datetime, convert_to_datetime
+from .convert import any_to_datetime, convert_to_datetime
 
 
 def time_to_interval(

@@ -11,8 +11,9 @@ from typing import Any
 from dateutil import parser
 from pytz import AmbiguousTimeError
 
-from time_helper.const import DATE_FORMATS
-from time_helper.timezone import current_timezone, find_timezone
+from .const import DATE_FORMATS
+from .natural import parse_natural
+from .timezone import current_timezone, find_timezone
 
 # Module-level logger
 _logger = logging.getLogger(__name__)
@@ -102,7 +103,10 @@ def unix_to_datetime(ts: str | int | float | Any, tz: timezone | str | Any = Non
 
 
 def any_to_datetime(
-    ts: str | datetime | date | Any, logger: Logger | None = None, date_format: str | None = None
+    ts: str | datetime | date | Any,
+    logger: Logger | None = None,
+    date_format: str | None = None,
+    allow_natural: bool = True,
 ) -> datetime | None:
     """Generates a safe datetime from the input information.
 
@@ -110,6 +114,7 @@ def any_to_datetime(
         ts: object to convert to datetime
         logger: Logging object to output infos
         date_format: Optional string with the date format to use (otherwise will try common ones)
+        allow_natural: If True, will try to parse natural language dates
 
     Returns:
         `datetime` object if converted or `None`
@@ -168,6 +173,11 @@ def any_to_datetime(
             dt = dt.astype(datetime)
         if dt == np.nan:
             return None
+
+    # check for natural language
+    if allow_natural and dt is None:
+        with contextlib.suppress(ValueError):
+            dt = parse_natural(str(ts))
 
     if dt is None:
         raise ValueError(f"Unable to parse datetime ({ts})")

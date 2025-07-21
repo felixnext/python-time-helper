@@ -6,7 +6,15 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 import pytest
 
-from time_helper import has_timezone, localize_datetime, make_aware, make_unaware, parse_time, unix_to_datetime
+from time_helper import (
+    any_to_datetime,
+    has_timezone,
+    localize_datetime,
+    make_aware,
+    make_unaware,
+    parse_time,
+    unix_to_datetime,
+)
 
 LOCAL_TZ = datetime.now().astimezone().tzname()
 LOCAL_TZ = "CET" if LOCAL_TZ == "CEST" else LOCAL_TZ
@@ -42,8 +50,11 @@ def test_parse() -> None:
 
 
 def test_any() -> None:
-    # TODO: implement
-    pass
+    # test natural language
+    today = datetime.now()
+    dt = any_to_datetime("tomorrow")
+    assert dt is not None
+    assert dt - today <= timedelta(days=1)
 
 
 def test_unix() -> None:
